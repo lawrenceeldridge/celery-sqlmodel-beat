@@ -228,6 +228,7 @@ class DatabaseScheduler(Scheduler):
         )
 
     def create_db_and_tables(self) -> None:
+        logger.debug(f'create_db_and_tables - dburi: {self.dburi}')
         SQLModel.metadata.create_all(self.engine)
 
     def get_session(self) -> Session:
