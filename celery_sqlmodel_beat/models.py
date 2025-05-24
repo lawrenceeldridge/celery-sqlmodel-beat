@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Optional
 from zoneinfo import ZoneInfo
@@ -14,6 +14,7 @@ from cron_descriptor import (
 )
 from pydantic import ValidationError, field_validator, model_validator
 from pydantic_core import InitErrorDetails, PydanticCustomError
+from sqlalchemy import DateTime
 from sqlalchemy.event import listen
 from sqlmodel import Column, Field, Relationship, Session, SQLModel, select, BIGINT
 
@@ -33,12 +34,15 @@ class ModelMixin(SQLModel):
     """Base model mixin"""
     id: int = Field(primary_key=True)
     created_at: datetime = Field(
-        sa_column=sa.Column(sa.DateTime(timezone=True), nullable=False),
-        default=nowfun(),
+        sa_type=DateTime(timezone=True),
+        default_factory=lambda: datetime.now(timezone.utc),
+        nullable=False,
     )
     updated_at: datetime = Field(
-        sa_column=sa.Column(sa.DateTime(timezone=True), nullable=False),
-        default_factory=nowfun,
+        sa_type=DateTime(timezone=True),
+        sa_column_kwargs={"onupdate": lambda: datetime.now(timezone.utc)},
+        default_factory=lambda: datetime.now(timezone.utc),
+        nullable=False,
     )
 
     @classmethod
